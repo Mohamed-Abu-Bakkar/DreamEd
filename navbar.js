@@ -11,7 +11,17 @@
         const path = window.location.pathname;
         const filename = path.split('/').pop() || 'index.html';
         // Handle both index.html and empty path (root)
-        return filename.replace('.html', '') || 'index';
+        const page = filename.replace('.html', '') || 'index';
+        
+        // Map pages to their IDs for active state
+        const pageMap = {
+            'index': 'home',
+            'mbbsabroad': 'mbbs',
+            'career': 'career',
+            'contact': 'contact'
+        };
+        
+        return pageMap[page] || page;
     }
 
     // Toggle mobile menu
@@ -81,6 +91,59 @@
     function renderNavbar() {
         const currentPage = getCurrentPage();
         
+        // Add page transition styles
+        const transitionStyles = `
+            <style>
+                /* Page load animation */
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes slideInLeft {
+                    from { opacity: 0; transform: translateX(-20px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes slideInRight {
+                    from { opacity: 0; transform: translateX(20px); }
+                    to { opacity: 1; transform: translateX(0); }
+                }
+                @keyframes scaleIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                /* Animated underline for nav */
+                @keyframes widthGrow {
+                    from { width: 0; }
+                    to { width: 100%; }
+                }
+                .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+                .animate-slide-left { animation: slideInLeft 0.5s ease-out forwards; }
+                .animate-slide-right { animation: slideInRight 0.5s ease-out forwards; }
+                .animate-scale-in { animation: scaleIn 0.4s ease-out forwards; }
+                .animate-width { animation: widthGrow 0.3s ease-out forwards; }
+                
+                /* Stagger children animations */
+                .stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+                .stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+                .stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+                .stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+                .stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+                
+                /* Navbar animation on load */
+                #navbar-container nav { animation: fadeInUp 0.4s ease-out; }
+                
+                /* Smooth scroll */
+                html { scroll-behavior: smooth; }
+                
+                /* Button hover animations */
+                .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+                .btn-animate:active { transform: translateY(0); }
+            </style>
+        `;
+        
+        // Inject styles
+        document.head.insertAdjacentHTML('beforeend', transitionStyles);
+        
         // Nav items - home links to index.html
         const navItems = [
             { name: 'Home', href: 'index.html', id: 'home' },
@@ -88,22 +151,23 @@
             { name: 'Career Programs', href: 'career.html', id: 'career' }
         ];
 
-        // Generate desktop nav links
+        // Generate desktop nav links with animation
         let navLinks = navItems.map(item => {
-            const isActive = (currentPage === item.id) || 
-                (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
+            const isActive = currentPage === item.id;
             const activeClass = isActive 
                 ? 'text-blue-900 border-b-2 border-yellow-600' 
-                : 'text-blue-900/70 hover:text-yellow-600';
-            return `<a class="font-serif text-lg tracking-tight ${activeClass} transition-colors duration-300" href="${item.href}">${item.name}</a>`;
+                : 'text-blue-900/70 hover:text-yellow-600 hover:-translate-y-0.5';
+            return `<a class="font-serif text-lg tracking-tight ${activeClass} transition-all duration-300 relative btn-animate" href="${item.href}">
+                ${item.name}
+                ${isActive ? '<span class="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-600"></span>' : ''}
+            </a>`;
         }).join('');
 
-        // Generate mobile nav links
+        // Generate mobile nav links with animation
         const mobileNavLinks = navItems.map(item => {
-            const isActive = (currentPage === item.id) || 
-                (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
-            const activeClass = isActive ? 'text-blue-900 font-semibold' : 'text-blue-900/70';
-            return `<a class="font-serif text-lg ${activeClass}" href="${item.href}">${item.name}</a>`;
+            const isActive = currentPage === item.id;
+            const activeClass = isActive ? 'text-blue-900 font-semibold bg-yellow-50' : 'text-blue-900/70';
+            return `<a class="font-serif text-lg ${activeClass} px-3 py-2 rounded-lg transition-all duration-200 hover:bg-yellow-50 hover:translate-x-1" href="${item.href}">${item.name}</a>`;
         }).join('');
 
         const navbarHTML = `
