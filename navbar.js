@@ -141,6 +141,9 @@
 .btn-animate:active { transform: translateY(0); }
 
 /* Subtle slide in from left on load */
+.slide-load { 
+    animation: slideInLeft 0.6s ease-out forwards; 
+}
 .fade-smooth { 
     animation: slideInLeft 0.6s ease-out; 
     opacity: 1;
@@ -277,10 +280,10 @@
             const isActive = currentPage === item.id;
             const activeClass = isActive 
                 ? 'text-blue-900 border-b-2 border-yellow-600' 
-                : 'text-blue-900/70 hover:text-yellow-600 hover:-translate-y-0.5';
-            return `<a class="font-serif text-lg tracking-tight ${activeClass} transition-all duration-300 relative btn-animate" href="${item.href}">
+                : 'text-blue-900/70 transition-all duration-300 hover:text-yellow-600';
+            return `<a class="font-serif text-lg tracking-tight ${activeClass} relative group" href="${item.href}">
                 ${item.name}
-                ${isActive ? '<span class="absolute -bottom-1 left-0 w-full h-0.5 bg-yellow-600"></span>' : ''}
+                <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-600 transition-all duration-300 group-hover:w-full"></span>
             </a>`;
         }).join('');
 
