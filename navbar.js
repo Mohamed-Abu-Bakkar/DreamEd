@@ -139,14 +139,13 @@
                 .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
                 .btn-animate:active { transform: translateY(0); }
                 
-                /* Lazy load images with fade in */
-                img { opacity: 0; transition: opacity 0.5s ease-in-out; }
+                /* Smooth image loading - no blink */
+                img { transition: opacity 0.3s ease-out; }
                 img.loaded { opacity: 1; }
-                img.lazy { opacity: 0; }
-                img.lazy.loaded { opacity: 1; }
                 
                 /* Image hover zoom effect */
                 .img-zoom-container { overflow: hidden; }
+                .img-zoom-container img { transition: transform 0.5s ease; }
                 .img-zoom-container img:hover { transform: scale(1.05); }
                 
                 /* Section reveal animation */
@@ -165,20 +164,7 @@
         // Inject styles
         document.head.insertAdjacentHTML('beforeend', transitionStyles);
         
-        // Lazy load images
-        setTimeout(() => {
-            document.querySelectorAll('img').forEach(img => {
-                if (img.complete) {
-                    img.classList.add('loaded');
-                } else {
-                    img.addEventListener('load', function() {
-                        this.classList.add('loaded');
-                    });
-                }
-            });
-        }, 100);
-        
-        // Reveal on scroll
+        // Nav items - home links to index.html
         const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
