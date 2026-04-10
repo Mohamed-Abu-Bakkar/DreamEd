@@ -135,22 +135,62 @@
                 /* Smooth scroll */
                 html { scroll-behavior: smooth; }
                 
-                /* Button hover animations */
-                .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-                .btn-animate:active { transform: translateY(0); }
-                
-                /* Smooth image loading - no blink */
-                img { transition: opacity 0.3s ease-out; }
-                img.loaded { opacity: 1; }
+/* Button animations */
+.btn-animate { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.btn-animate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+.btn-animate:active { transform: translateY(0); }
+
+/* Subtle slide in from left on load */
+.fade-smooth { 
+    animation: slideInLeft 0.6s ease-out; 
+    opacity: 1;
+}
+@keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Subtle slide in from right */
+.slide-right { 
+    animation: slideInRight 0.6s ease-out 0.2s both; 
+    opacity: 1;
+}
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
                 
                 /* Image hover zoom effect */
                 .img-zoom-container { overflow: hidden; }
                 .img-zoom-container img { transition: transform 0.5s ease; }
                 .img-zoom-container img:hover { transform: scale(1.05); }
                 
-                /* Section reveal animation */
-                .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
-                .reveal.visible { opacity: 1; transform: translateY(0); }
+                /* Scroll reveal animations - subtle fade up */
+                .scroll-reveal { 
+                    opacity: 0; 
+                    transform: translateY(40px); 
+                    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+                }
+                .scroll-reveal.reveal-visible { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
+                
+                /* Stagger delay for children */
+                .scroll-reveal-stagger > *:nth-child(1) { transition-delay: 0.1s; }
+                .scroll-reveal-stagger > *:nth-child(2) { transition-delay: 0.2s; }
+                .scroll-reveal-stagger > *:nth-child(3) { transition-delay: 0.3s; }
+                .scroll-reveal-stagger > *:nth-child(4) { transition-delay: 0.4s; }
+                .scroll-reveal-stagger > *:nth-child(5) { transition-delay: 0.5s; }
+                .scroll-reveal-stagger > * { 
+                    opacity: 0; 
+                    transform: translateY(30px); 
+                    transition: opacity 0.5s ease-out, transform 0.5s ease-out; 
+                }
+                .scroll-reveal-stagger.reveal-visible > * { 
+                    opacity: 1; 
+                    transform: translateY(0); 
+                }
                 
                 /* Floating animation */
                 @keyframes float {
@@ -161,13 +201,25 @@
                 
                 /* Counter animation */
                 .counter { display: inline-block; }
-                .counter-animate { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
-                .counter-animate.visible { opacity: 1; transform: translateY(0); }
             </style>
         `;
         
         // Inject styles
         document.head.insertAdjacentHTML('beforeend', transitionStyles);
+        
+        // Scroll reveal observer
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('reveal-visible');
+                    scrollObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+        
+        document.querySelectorAll('.scroll-reveal, .scroll-reveal-stagger').forEach(el => {
+            scrollObserver.observe(el);
+        });
         
         // Counter animation on scroll
         const counterObserver = new IntersectionObserver((entries) => {
