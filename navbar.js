@@ -1,138 +1,203 @@
-function getCurrentPage() {
-    const path = window.location.pathname;
-    const filename = path.split('/').pop() || 'home.html';
-    return filename.replace('.html', '');
-}
+/**
+ * DreamEd Navbar System
+ * Dynamically loads navbar and modal across all pages
+ */
 
-function toggleMobileMenu() {
-    const menu = document.getElementById('mobile-menu');
-    if (menu) {
-        menu.classList.toggle('hidden');
+(function() {
+    'use strict';
+
+    // Get current page from URL
+    function getCurrentPage() {
+        const path = window.location.pathname;
+        const filename = path.split('/').pop() || 'index.html';
+        // Handle both index.html and empty path (root)
+        return filename.replace('.html', '') || 'index';
     }
-}
 
-function openCounselingModal() {
-    const modal = document.getElementById('counseling-modal');
-    if (modal) {
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-    }
-}
+    // Toggle mobile menu
+    window.toggleMobileMenu = function() {
+        const menu = document.getElementById('mobile-menu');
+        if (menu) {
+            menu.classList.toggle('hidden');
+        }
+    };
 
-function closeCounselingModal() {
-    const modal = document.getElementById('counseling-modal');
-    if (modal) {
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-    }
-}
+    // Open counseling modal
+    window.openCounselingModal = function() {
+        const modal = document.getElementById('counseling-modal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    };
 
-function renderNavbar() {
-    const currentPage = getCurrentPage();
-    
-    const navItems = [
-        { name: 'Home', href: 'home.html', id: 'home' },
-        { name: 'MBBS Abroad', href: 'mbbsabroad.html', id: 'mbbs' },
-        { name: 'Career Programs', href: 'career.html', id: 'career' }
-    ];
+    // Close counseling modal
+    window.closeCounselingModal = function() {
+        const modal = document.getElementById('counseling-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    };
 
-    let navLinks = navItems.map(item => {
-        const isActive = (currentPage === item.id) || 
-            (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
-        const activeClass = isActive 
-            ? 'text-blue-900 border-b-2 border-yellow-600' 
-            : 'text-blue-900/70';
-        return `<a class="font-serif text-lg tracking-tight ${activeClass} hover:text-yellow-600 transition-colors duration-300" href="${item.href}">${item.name}</a>`;
-    }).join('');
-
-    const mobileNavLinks = navItems.map(item => {
-        const isActive = (currentPage === item.id) || 
-            (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
-        const activeClass = isActive ? 'text-blue-900' : 'text-blue-900/70';
-        return `<a class="font-serif text-lg ${activeClass}" href="${item.href}">${item.name}</a>`;
-    }).join('');
-
-    const navbarHTML = `
-    <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm shadow-blue-900/5">
-        <div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
-            <a href="home.html" class="text-2xl font-black font-serif text-blue-950">DreamEd</a>
-            <div class="hidden md:flex items-center gap-8">
-                ${navLinks}
-            </div>
-            <button class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-medium text-sm tracking-wide active:scale-95 transition-all duration-150" style="box-shadow: 0 20px 40px -10px rgba(27, 27, 34, 0.08);" onclick="openCounselingModal()">
-                Book Free Counseling
-            </button>
-            <button class="md:hidden text-primary" onclick="toggleMobileMenu()">
-                <span class="material-symbols-outlined">menu</span>
-            </button>
-        </div>
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-            <div class="px-8 py-4 flex flex-col gap-4">
-                ${mobileNavLinks}
-                <button class="bg-primary text-on-primary px-6 py-2.5 rounded-md font-medium text-sm" onclick="openCounselingModal()">Book Free Counseling</button>
-            </div>
-        </div>
-    </nav>
-    `;
-
-    // Add modal HTML
-    const modalHTML = `
-    <div id="counseling-modal" class="fixed inset-0 z-[200] hidden">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCounselingModal()"></div>
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center hover:bg-surface-container-high transition-colors" onclick="closeCounselingModal()">
-                    <span class="material-symbols-outlined text-on-surface-variant">close</span>
+    // Handle form submission
+    window.handleCounselingSubmit = function(event) {
+        event.preventDefault();
+        
+        const form = event.target;
+        const formData = new FormData(form);
+        
+        // Log form data to console
+        const data = {
+            firstName: formData.get('firstName') || form.querySelector('input[placeholder="John"]')?.value,
+            lastName: formData.get('lastName') || form.querySelector('input[placeholder="Doe"]')?.value,
+            email: formData.get('email') || form.querySelector('input[type="email"]')?.value,
+            phone: formData.get('phone') || form.querySelector('input[type="tel"]')?.value,
+            interestedIn: formData.get('interestedIn') || form.querySelector('select')?.value,
+            message: formData.get('message') || form.querySelector('textarea')?.value,
+            submittedAt: new Date().toISOString()
+        };
+        
+        console.log('=== Form Submission ===', data);
+        
+        // Show success message
+        const formContainer = form.parentElement;
+        formContainer.innerHTML = `
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="material-symbols-outlined text-green-600 text-4xl">check_circle</span>
+                </div>
+                <h3 class="text-2xl font-bold text-primary mb-2">Thank You!</h3>
+                <p class="text-on-surface-variant mb-4">Your consultation request has been submitted successfully.</p>
+                <p class="text-sm text-on-surface-variant">Our team will contact you within 24 hours.</p>
+                <button type="button" onclick="closeCounselingModal()" class="mt-6 bg-primary text-white px-6 py-2 rounded-lg font-medium hover:bg-primary-container transition-colors">
+                    Close
                 </button>
-                <div class="p-8">
-                    <div class="text-center mb-8">
-                        <span class="inline-block px-4 py-1 bg-secondary-container text-on-secondary-container text-xs font-bold rounded-full mb-4">FREE CONSULTATION</span>
-                        <h2 class="font-headline text-3xl text-primary">Book Your Free Counseling</h2>
-                        <p class="text-on-surface-variant mt-2">Tell us about your goals and we'll help you achieve them.</p>
+            </div>
+        `;
+    };
+
+    // Render navbar
+    function renderNavbar() {
+        const currentPage = getCurrentPage();
+        
+        // Nav items - home links to index.html
+        const navItems = [
+            { name: 'Home', href: 'index.html', id: 'home' },
+            { name: 'MBBS Abroad', href: 'mbbsabroad.html', id: 'mbbs' },
+            { name: 'Career Programs', href: 'career.html', id: 'career' }
+        ];
+
+        // Generate desktop nav links
+        let navLinks = navItems.map(item => {
+            const isActive = (currentPage === item.id) || 
+                (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
+            const activeClass = isActive 
+                ? 'text-blue-900 border-b-2 border-yellow-600' 
+                : 'text-blue-900/70 hover:text-yellow-600';
+            return `<a class="font-serif text-lg tracking-tight ${activeClass} transition-colors duration-300" href="${item.href}">${item.name}</a>`;
+        }).join('');
+
+        // Generate mobile nav links
+        const mobileNavLinks = navItems.map(item => {
+            const isActive = (currentPage === item.id) || 
+                (item.id === 'home' && (currentPage === '' || currentPage === 'index'));
+            const activeClass = isActive ? 'text-blue-900 font-semibold' : 'text-blue-900/70';
+            return `<a class="font-serif text-lg ${activeClass}" href="${item.href}">${item.name}</a>`;
+        }).join('');
+
+        const navbarHTML = `
+        <nav class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm shadow-blue-900/5">
+            <div class="flex justify-between items-center px-4 md:px-8 py-4 max-w-7xl mx-auto">
+                <a href="index.html" class="text-2xl font-black font-serif text-blue-950">DreamEd</a>
+                <div class="hidden md:flex items-center gap-8">
+                    ${navLinks}
+                </div>
+                <button class="bg-primary text-white px-4 md:px-6 py-2 rounded-md font-medium text-sm tracking-wide active:scale-95 transition-all duration-150" style="box-shadow: 0 20px 40px -10px rgba(27, 27, 34, 0.08);" onclick="openCounselingModal()">
+                    Book Free Counseling
+                </button>
+                <button class="md:hidden text-primary p-2" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+            </div>
+            <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+                <div class="px-4 py-4 flex flex-col gap-4">
+                    ${mobileNavLinks}
+                    <button class="bg-primary text-white px-6 py-2.5 rounded-md font-medium text-sm" onclick="openCounselingModal()">Book Free Counseling</button>
+                </div>
+            </div>
+        </nav>
+        `;
+
+        // Modal HTML
+        const modalHTML = `
+        <div id="counseling-modal" class="fixed inset-0 z-[200] hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeCounselingModal()"></div>
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors" onclick="closeCounselingModal()" aria-label="Close modal">
+                        <span class="material-symbols-outlined text-gray-600">close</span>
+                    </button>
+                    <div class="p-8">
+                        <div class="text-center mb-8">
+                            <span class="inline-block px-4 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full mb-4">FREE CONSULTATION</span>
+                            <h2 id="modal-title" class="text-3xl font-bold text-blue-950">Book Your Free Counseling</h2>
+                            <p class="text-gray-600 mt-2">Tell us about your goals and we'll help you achieve them.</p>
+                        </div>
+                        <form onsubmit="handleCounselingSubmit(event)" class="space-y-5">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">First Name *</label>
+                                    <input required name="firstName" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all" placeholder="John" type="text"/>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">Last Name *</label>
+                                    <input required name="lastName" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all" placeholder="Doe" type="text"/>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">Email *</label>
+                                <input required name="email" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all" placeholder="john@example.com" type="email"/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">Phone *</label>
+                                <input required name="phone" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all" placeholder="+1 234 567 890" type="tel"/>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">Interested In *</label>
+                                <select required name="interestedIn" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all">
+                                    <option value="">Select a program</option>
+                                    <option value="MBBS Abroad">MBBS Abroad</option>
+                                    <option value="Career Programs">Career Programs</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-blue-950 uppercase tracking-wider">Message (Optional)</label>
+                                <textarea name="message" class="w-full bg-gray-50 border-2 border-transparent focus:border-yellow-500 rounded-lg px-4 py-3 transition-all" placeholder="Tell us about your goals..." rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-950 text-white py-4 rounded-xl font-bold hover:bg-blue-900 transition-all shadow-lg">
+                                Submit Request
+                            </button>
+                            <p class="text-center text-xs text-gray-500">We respect your privacy. Your information is safe with us.</p>
+                        </form>
                     </div>
-                    <form class="space-y-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-primary uppercase tracking-wider">First Name</label>
-                                <input class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all" placeholder="John" type="text"/>
-                            </div>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-primary uppercase tracking-wider">Last Name</label>
-                                <input class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all" placeholder="Doe" type="text"/>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-primary uppercase tracking-wider">Email</label>
-                            <input class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all" placeholder="john@example.com" type="email"/>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-primary uppercase tracking-wider">Phone</label>
-                            <input class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all" placeholder="+1 234 567 890" type="tel"/>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-primary uppercase tracking-wider">Interested In</label>
-                            <select class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all">
-                                <option>MBBS Abroad</option>
-                                <option>Career Programs</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-primary uppercase tracking-wider">Message (Optional)</label>
-                            <textarea class="w-full bg-surface-container-low border-2 border-transparent focus:border-secondary rounded-lg px-4 py-3 transition-all" placeholder="Tell us about your goals..." rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-primary-container transition-all shadow-lg">
-                            Submit Request
-                        </button>
-                        <p class="text-center text-xs text-on-surface-variant">We respect your privacy. Your information is safe with us.</p>
-                    </form>
                 </div>
             </div>
         </div>
-    </div>
-    `;
+        `;
 
-    document.getElementById('navbar-container').innerHTML = navbarHTML + modalHTML;
-}
+        // Inject navbar and modal
+        const container = document.getElementById('navbar-container');
+        if (container) {
+            container.innerHTML = navbarHTML + modalHTML;
+        }
+    }
 
-document.addEventListener('DOMContentLoaded', renderNavbar);
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderNavbar);
+    } else {
+        renderNavbar();
+    }
+})();
