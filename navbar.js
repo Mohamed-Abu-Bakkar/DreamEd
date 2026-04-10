@@ -138,11 +138,57 @@
                 /* Button hover animations */
                 .btn-animate:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
                 .btn-animate:active { transform: translateY(0); }
+                
+                /* Lazy load images with fade in */
+                img { opacity: 0; transition: opacity 0.5s ease-in-out; }
+                img.loaded { opacity: 1; }
+                img.lazy { opacity: 0; }
+                img.lazy.loaded { opacity: 1; }
+                
+                /* Image hover zoom effect */
+                .img-zoom-container { overflow: hidden; }
+                .img-zoom-container img:hover { transform: scale(1.05); }
+                
+                /* Section reveal animation */
+                .reveal { opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out; }
+                .reveal.visible { opacity: 1; transform: translateY(0); }
+                
+                /* Floating animation */
+                @keyframes float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                }
+                .animate-float { animation: float 3s ease-in-out infinite; }
             </style>
         `;
         
         // Inject styles
         document.head.insertAdjacentHTML('beforeend', transitionStyles);
+        
+        // Lazy load images
+        setTimeout(() => {
+            document.querySelectorAll('img').forEach(img => {
+                if (img.complete) {
+                    img.classList.add('loaded');
+                } else {
+                    img.addEventListener('load', function() {
+                        this.classList.add('loaded');
+                    });
+                }
+            });
+        }, 100);
+        
+        // Reveal on scroll
+        const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
         
         // Nav items - home links to index.html
         const navItems = [
