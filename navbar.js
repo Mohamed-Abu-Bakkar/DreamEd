@@ -158,11 +158,48 @@
                     50% { transform: translateY(-10px); }
                 }
                 .animate-float { animation: float 3s ease-in-out infinite; }
+                
+                /* Counter animation */
+                .counter { display: inline-block; }
+                .counter-animate { opacity: 0; transform: translateY(10px); transition: all 0.5s ease-out; }
+                .counter-animate.visible { opacity: 1; transform: translateY(0); }
             </style>
         `;
         
         // Inject styles
         document.head.insertAdjacentHTML('beforeend', transitionStyles);
+        
+        // Counter animation on scroll
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target;
+                    const target = parseInt(counter.getAttribute('data-target'));
+                    const suffix = counter.getAttribute('data-suffix') || '';
+                    const duration = parseInt(counter.getAttribute('data-duration')) || 2000;
+                    
+                    // Add visible class for opacity animation
+                    counter.classList.add('visible');
+                    
+                    // Animate counting
+                    let start = 0;
+                    const increment = target / (duration / 16);
+                    const timer = setInterval(() => {
+                        start += increment;
+                        if (start >= target) {
+                            counter.textContent = target + suffix;
+                            clearInterval(timer);
+                        } else {
+                            counter.textContent = Math.floor(start) + suffix;
+                        }
+                    }, 16);
+                    
+                    counterObserver.unobserve(counter);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
         
         // Nav items - home links to index.html
         const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
